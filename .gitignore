@@ -4,3 +4,5 @@ dist/
 logs/
 workspaces/
 .input/
+launch.json
+.claude/settings.local.json

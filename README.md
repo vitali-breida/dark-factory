@@ -33,7 +33,9 @@ Edit `.env` and fill in your credentials (see [Configuration](#configuration)).
 |---|---|---|---|
 | `GITHUB_TOKEN` | ✅ | — | GitHub personal access token (`repo` scope) |
 | `TARGET_REPO` | ✅ | — | Repository to fix issues in, e.g. `owner/repo` |
+| `TARGET_BRANCH` | | `main` | Base branch to clone and open PRs against |
 | `MAX_ISSUES_PER_RUN` | | `5` | Max number of issues to attempt per run |
+| `WORKSPACES_DIR` | | `./workspaces` | Directory for temporary repo clones |
 | `LABEL_FILTER` | | *(all)* | Comma-separated labels to filter by, e.g. `bug,help wanted` |
 
 > **Note:** `GITHUB_TOKEN` must have the `repo` scope to access private repositories and create pull requests.

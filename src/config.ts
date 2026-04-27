@@ -13,8 +13,10 @@ function optionalEnv(key: string, fallback: string): string {
 export interface Config {
   githubToken: string;
   targetRepo: string;
+  targetBranch: string;
   maxIssuesPerRun: number;
   labelFilter: string[];
+  workspacesDir: string;
 }
 
 export function loadConfig(): Config {
@@ -22,7 +24,9 @@ export function loadConfig(): Config {
   return {
     githubToken: requireEnv("GITHUB_TOKEN"),
     targetRepo: requireEnv("TARGET_REPO"),
+    targetBranch: optionalEnv("TARGET_BRANCH", "main"),
     maxIssuesPerRun: parseInt(optionalEnv("MAX_ISSUES_PER_RUN", "5"), 10),
     labelFilter: labelRaw ? labelRaw.split(",").map((s) => s.trim()) : [],
+    workspacesDir: optionalEnv("WORKSPACES_DIR", "./workspaces"),
   };
 }
