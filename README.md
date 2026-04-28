@@ -44,24 +44,22 @@ Edit `.env` and fill in your credentials (see [Configuration](#configuration)).
 | `TARGET_BRANCH` | `main` | Base branch to clone and open PRs against |
 | `LABEL_FILTER` | *(all)* | Comma-separated labels to filter by, e.g. `bug,help wanted` |
 
-**Run limits**
+**Pipeline**
 
 | Variable | Default | Description |
 |---|---|---|
 | `MAX_ISSUES_PER_RUN` | `5` | Max number of issues to attempt per run |
 | `WORKSPACES_DIR` | `./workspaces` | Directory for temporary repo clones |
+| `SETUP_COMMAND` | `npm install` | Command to install dependencies after clone |
+| `TEST_COMMAND` | `npm test` | Command to run the target repo's test suite |
+| `TEST_TIMEOUT_MS` | `300000` | Test timeout in milliseconds (default: 5 min) |
 
-**LLM models**
+**LLM**
 
 | Variable | Default | Description |
 |---|---|---|
 | `FILTER_MODEL` | `claude-haiku-4-5-20251001` | Model used for issue triage (cheap, fast) |
 | `FIX_MODEL` | `claude-sonnet-4-6` | Model used for fix generation |
-
-**LLM context limits**
-
-| Variable | Default | Description |
-|---|---|---|
 | `MAX_RELEVANT_FILES` | `10` | Max files passed to the fix prompt |
 | `MAX_INPUT_TOKENS` | `150000` | Abort if estimated input exceeds this |
 | `MAX_FILE_LINES` | `300` | Lines read per file before truncation |

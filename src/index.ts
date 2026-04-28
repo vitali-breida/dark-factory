@@ -3,6 +3,7 @@ import { fetchFilteredIssues } from "./github/issues.js";
 import { WorkspaceManager } from "./git/workspace.js";
 import { generateFix } from "./llm/fixer.js";
 import { filterIssuesWithLLM } from "./llm/issueFilter.js";
+import { runTests } from "./runner/testRunner.js";
 
 async function main() {
   const config = loadConfig();
@@ -44,9 +45,22 @@ async function main() {
     const fix = await generateFix(config, issue, repoTree, workspace.getDir());
 
     console.log(`\n[llm] Reasoning: ${fix.reasoning}`);
-    console.log(`\n[llm] Generated ${fix.changes.length} change(s):`);
-    for (const change of fix.changes) {
-      console.log(`  ${change.action.padEnd(6)}  ${change.path}`);
+    console.log(`\n[llm] Applying ${fix.changes.length} change(s):`);
+
+    await workspace.applyFileChanges(fix.changes);
+
+    console.log(`\n[runner] Setup: ${config.setupCommand}`);
+    await runTests(workspace.getDir(), config.setupCommand, config.testTimeoutMs);
+
+    console.log(`[runner] Test command: ${config.testCommand}`);
+    const result = await runTests(workspace.getDir(), config.testCommand, config.testTimeoutMs);
+
+    const status = result.passed ? "PASS" : "FAIL";
+    console.log(`[runner] ${status} — exit code ${result.exitCode}, duration: ${(result.durationMs / 1000).toFixed(1)}s`);
+
+    if (!result.passed) {
+      console.log(`\n[runner] Test output${result.truncated ? " (truncated)" : ""}:\n`);
+      console.log(result.output);
     }
   } finally {
     await workspace.cleanup();

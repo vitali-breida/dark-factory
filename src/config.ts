@@ -24,15 +24,16 @@ export interface Config {
   targetBranch: string;
   labelFilter: string[];
 
-  // Run limits
+  // Pipeline
   maxIssuesPerRun: number;
   workspacesDir: string;
+  setupCommand: string;
+  testCommand: string;
+  testTimeoutMs: number;
 
-  // LLM models
+  // LLM
   filterModel: string;
   fixModel: string;
-
-  // LLM context limits
   maxRelevantFiles: number;
   maxInputTokens: number;
   maxFileLines: number;
@@ -50,15 +51,16 @@ export function loadConfig(): Config {
     targetBranch: optionalEnv("TARGET_BRANCH", "main"),
     labelFilter: labelRaw ? labelRaw.split(",").map((s) => s.trim()) : [],
 
-    // Run limits
+    // Pipeline
     maxIssuesPerRun: optionalInt("MAX_ISSUES_PER_RUN", 5),
     workspacesDir: optionalEnv("WORKSPACES_DIR", "./workspaces"),
+    setupCommand: optionalEnv("SETUP_COMMAND", "npm install"),
+    testCommand: optionalEnv("TEST_COMMAND", "npm test"),
+    testTimeoutMs: optionalInt("TEST_TIMEOUT_MS", 300_000),
 
-    // LLM models
+    // LLM
     filterModel: optionalEnv("FILTER_MODEL", "claude-haiku-4-5-20251001"),
     fixModel: optionalEnv("FIX_MODEL", "claude-sonnet-4-6"),
-
-    // LLM context limits
     maxRelevantFiles: optionalInt("MAX_RELEVANT_FILES", 10),
     maxInputTokens: optionalInt("MAX_INPUT_TOKENS", 150_000),
     maxFileLines: optionalInt("MAX_FILE_LINES", 300),
