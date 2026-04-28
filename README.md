@@ -97,7 +97,9 @@ The system runs end-to-end autonomously after initial setup. The only manual ste
 1. Create a `GITHUB_TOKEN` with `repo` scope at [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Create an `ANTHROPIC_API_KEY` at [console.anthropic.com](https://console.anthropic.com)
 3. Set `TEST_COMMAND` to whatever the target repo uses to run tests (check its README)
-4. Review and merge (or close) the generated pull requests — the system never auto-merges
+4. **Review and merge (or close) the generated pull requests** — the system never auto-merges
+
+> **Note:** After a PR is created, Dark Factory does not monitor its status on GitHub. It does not know whether CI passes or fails on the remote, and it will not attempt further fixes based on remote results. A human must review each PR, check CI results, and decide whether to approve and merge it.
 
 ## Tech Stack
 
