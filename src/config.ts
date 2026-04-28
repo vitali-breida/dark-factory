@@ -30,6 +30,7 @@ export interface Config {
   setupCommand: string;
   testCommand: string;
   testTimeoutMs: number;
+  maxRetries: number;
 
   // LLM
   filterModel: string;
@@ -57,6 +58,7 @@ export function loadConfig(): Config {
     setupCommand: optionalEnv("SETUP_COMMAND", "npm install"),
     testCommand: optionalEnv("TEST_COMMAND", "npm test"),
     testTimeoutMs: optionalInt("TEST_TIMEOUT_MS", 300_000),
+    maxRetries: optionalInt("MAX_RETRIES", 2),
 
     // LLM
     filterModel: optionalEnv("FILTER_MODEL", "claude-haiku-4-5-20251001"),

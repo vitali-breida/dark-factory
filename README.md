@@ -13,8 +13,24 @@ An autonomous system that fetches open GitHub issues, generates fixes using Clau
 ## Requirements
 
 - Node.js 20+
-- A GitHub personal access token with `repo` scope
+- A GitHub personal access token (see below)
 - An Anthropic API key
+
+## GitHub Token Setup
+
+Create a token at [github.com/settings/tokens](https://github.com/settings/tokens).
+
+**Fine-grained token (recommended):**
+1. Set **Repository access** to "All repositories" or select specific repos
+2. Under **Repository permissions** add:
+
+| Permission | Level |
+|---|---|
+| Contents | Read and write |
+| Pull requests | Read and write |
+| Issues | Read-only |
+
+**Classic token:** select the `repo` scope (full control of private repositories).
 
 ## Setup
 
@@ -53,6 +69,7 @@ Edit `.env` and fill in your credentials (see [Configuration](#configuration)).
 | `SETUP_COMMAND` | `npm install` | Command to install dependencies after clone |
 | `TEST_COMMAND` | `npm test` | Command to run the target repo's test suite |
 | `TEST_TIMEOUT_MS` | `300000` | Test timeout in milliseconds (default: 5 min) |
+| `MAX_RETRIES` | `2` | Retry attempts if tests fail before abandoning |
 
 **LLM**
 

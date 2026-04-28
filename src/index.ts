@@ -1,9 +1,7 @@
 import { loadConfig } from "./config.js";
 import { fetchFilteredIssues } from "./github/issues.js";
-import { WorkspaceManager } from "./git/workspace.js";
-import { generateFix } from "./llm/fixer.js";
 import { filterIssuesWithLLM } from "./llm/issueFilter.js";
-import { runTests } from "./runner/testRunner.js";
+import { runOrchestrator } from "./loop/orchestrator.js";
 
 async function main() {
   const config = loadConfig();
@@ -32,41 +30,19 @@ async function main() {
     console.log(`  #${issue.number}${labels} — ${issue.title}`);
   }
 
-  const issue = suitableIssues[0];
-  console.log(`\n[Dark Factory] Processing issue #${issue.number}: ${issue.title}`);
+  const results = await runOrchestrator(config, suitableIssues);
 
-  const workspace = await WorkspaceManager.cloneRepo(config, issue);
-
-  try {
-    const repoTree = await workspace.listFiles();
-    console.log(`[workspace] ${repoTree.split("\n").length} files in repo`);
-
-    console.log(`[llm] Analyzing issue and generating fix...`);
-    const fix = await generateFix(config, issue, repoTree, workspace.getDir());
-
-    console.log(`\n[llm] Reasoning: ${fix.reasoning}`);
-    console.log(`\n[llm] Applying ${fix.changes.length} change(s):`);
-
-    await workspace.applyFileChanges(fix.changes);
-
-    console.log(`\n[runner] Setup: ${config.setupCommand}`);
-    await runTests(workspace.getDir(), config.setupCommand, config.testTimeoutMs);
-
-    console.log(`[runner] Test command: ${config.testCommand}`);
-    const result = await runTests(workspace.getDir(), config.testCommand, config.testTimeoutMs);
-
-    const status = result.passed ? "PASS" : "FAIL";
-    console.log(`[runner] ${status} — exit code ${result.exitCode}, duration: ${(result.durationMs / 1000).toFixed(1)}s`);
-
-    if (!result.passed) {
-      console.log(`\n[runner] Test output${result.truncated ? " (truncated)" : ""}:\n`);
-      console.log(result.output);
+  console.log(`\n${"═".repeat(60)}`);
+  console.log(`[Dark Factory] Run complete — ${results.length} issue(s) processed`);
+  for (const r of results) {
+    if (r.status === "pr_created") {
+      console.log(`  ✓ #${r.issue.number} — PR created: ${r.prUrl}`);
+    } else if (r.status === "abandoned") {
+      console.log(`  ✗ #${r.issue.number} — Abandoned after ${r.retries} retries`);
+    } else {
+      console.log(`  ! #${r.issue.number} — Error: ${r.error}`);
     }
-  } finally {
-    await workspace.cleanup();
   }
-
-  console.log("\n[Dark Factory] Done.");
 }
 
 main().catch((err) => {
