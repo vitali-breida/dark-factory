@@ -66,6 +66,7 @@ Edit `.env` and fill in your credentials (see [Configuration](#configuration)).
 |---|---|---|
 | `MAX_ISSUES_PER_RUN` | `5` | Max number of issues to attempt per run |
 | `WORKSPACES_DIR` | `./workspaces` | Directory for temporary repo clones |
+| `LOGS_DIR` | `./logs` | Directory for JSONL logs and Markdown reports |
 | `SETUP_COMMAND` | `npm install` | Command to install dependencies after clone |
 | `TEST_COMMAND` | `npm test` | Command to run the target repo's test suite |
 | `TEST_TIMEOUT_MS` | `300000` | Test timeout in milliseconds (default: 5 min) |

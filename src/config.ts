@@ -27,6 +27,7 @@ export interface Config {
   // Pipeline
   maxIssuesPerRun: number;
   workspacesDir: string;
+  logsDir: string;
   setupCommand: string;
   testCommand: string;
   testTimeoutMs: number;
@@ -55,6 +56,7 @@ export function loadConfig(): Config {
     // Pipeline
     maxIssuesPerRun: optionalInt("MAX_ISSUES_PER_RUN", 5),
     workspacesDir: optionalEnv("WORKSPACES_DIR", "./workspaces"),
+    logsDir: optionalEnv("LOGS_DIR", "./logs"),
     setupCommand: optionalEnv("SETUP_COMMAND", "npm install"),
     testCommand: optionalEnv("TEST_COMMAND", "npm test"),
     testTimeoutMs: optionalInt("TEST_TIMEOUT_MS", 300_000),

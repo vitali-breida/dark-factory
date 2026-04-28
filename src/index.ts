@@ -2,25 +2,33 @@ import { loadConfig } from "./config.js";
 import { fetchFilteredIssues } from "./github/issues.js";
 import { filterIssuesWithLLM } from "./llm/issueFilter.js";
 import { runOrchestrator } from "./loop/orchestrator.js";
+import { Logger } from "./logger/logger.js";
+import { generateReport } from "./logger/report.js";
 
 async function main() {
   const config = loadConfig();
-  console.log(`[Dark Factory] Target repo: ${config.targetRepo}`);
-  console.log(`[Dark Factory] Fetching open issues...`);
+  const logger = new Logger(config.logsDir);
 
+  console.log(`[Dark Factory] Target repo: ${config.targetRepo}`);
+  logger.log("run_started", { targetRepo: config.targetRepo, maxIssues: config.maxIssuesPerRun });
+
+  console.log(`[Dark Factory] Fetching open issues...`);
   const issues = await fetchFilteredIssues(config);
 
   if (issues.length === 0) {
     console.log("[Dark Factory] No matching issues found.");
+    await logger.flush();
     return;
   }
 
   console.log(`[Dark Factory] Found ${issues.length} issue(s) after basic filters`);
+  logger.log("issues_fetched", { total: issues.length });
 
   const suitableIssues = await filterIssuesWithLLM(config, issues);
 
   if (suitableIssues.length === 0) {
     console.log("[Dark Factory] No suitable issues found after LLM filter.");
+    await logger.flush();
     return;
   }
 
@@ -30,7 +38,18 @@ async function main() {
     console.log(`  #${issue.number}${labels} — ${issue.title}`);
   }
 
-  const results = await runOrchestrator(config, suitableIssues);
+  const results = await runOrchestrator(config, suitableIssues, logger);
+
+  logger.log("run_completed", {
+    total: results.length,
+    prCreated: results.filter((r) => r.status === "pr_created").length,
+    abandoned: results.filter((r) => r.status === "abandoned").length,
+    errored: results.filter((r) => r.status === "errored").length,
+  });
+
+  await logger.flush();
+
+  const reportPath = await generateReport(config.logsDir, logger.getLogPath(), results, logger.getEvents());
 
   console.log(`\n${"═".repeat(60)}`);
   console.log(`[Dark Factory] Run complete — ${results.length} issue(s) processed`);
@@ -43,6 +62,8 @@ async function main() {
       console.log(`  ! #${r.issue.number} — Error: ${r.error}`);
     }
   }
+  console.log(`\n[Dark Factory] Report: ${reportPath}`);
+  console.log(`[Dark Factory] Log:    ${logger.getLogPath()}`);
 }
 
 main().catch((err) => {
